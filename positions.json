@@ -1,0 +1,44 @@
+{
+    "bateaux": [
+        {
+            "position": [
+                1.0,
+                4.0
+            ],
+            "horizontal": true,
+            "taille": 2
+        },
+        {
+            "position": [
+                3.0,
+                0.0
+            ],
+            "horizontal": true,
+            "taille": 2
+        },
+        {
+            "position": [
+                4.0,
+                3.0
+            ],
+            "horizontal": true,
+            "taille": 3
+        },
+        {
+            "position": [
+                1.0,
+                6.0
+            ],
+            "horizontal": true,
+            "taille": 4
+        },
+        {
+            "position": [
+                0.0,
+                8.0
+            ],
+            "horizontal": true,
+            "taille": 5
+        }
+    ]
+}
