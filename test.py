@@ -276,6 +276,10 @@ while True:
                 print("you're dead")
                 pygame.quit()
                 sys.exit()
+            elif a == 4 :
+                print("you won")
+                pygame.quit()
+                sys.exit()
                 
 
 

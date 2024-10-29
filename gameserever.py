@@ -51,37 +51,43 @@ while True:
     print(f"Connected to {address} with ID: {client_id}")
     id_list.append(client_id)
     con_liest.append(conn)
+
     for i in range(1, 4):  # Limiter à 3 fichiers
         text_file = f'fileProj{i}.json'  # Nom des fichiers pour les 3 envois
-        data = conn.recv(32)  # Recevoir les données
+        data = conn.recv(32)  # Recevoir la commande initiale
 
         if not data:
             print("No more data received, closing connection.")
             break  # Si aucune donnée, sortir de la boucle
 
+        # Vérification du signal SEND_FILE
         if data == b'SEND_FILE':
             print(f"Starting to receive file {i}...")
             with open(text_file, "wb") as fw:
                 while True:
-                    chunk = conn.recv(32)
+                    chunk = conn.recv(1024)  # Recevoir des données par morceaux
                     if not chunk:
                         print("No more data received, closing file.")
                         break
-                    elif chunk == b'BEGIN':
-                        print("File transmission has begun.")
-                        continue
-                    elif chunk == b'ENDED':
+
+                    # Vérifier le signal de fin 'ENDED'
+                    if chunk.endswith(b'ENDED'):
+                        # Écrire le dernier morceau sans 'ENDED'
+                        fw.write(chunk[:-5])
                         print('Ending the file transfer.')
                         break
-                    else:
-                        fw.write(chunk)  # Écrire les données dans le fichier
-                        print('Wrote to file:', chunk.decode('utf-8', errors='ignore'))
+
+                    # Écrire les données reçues dans le fichier
+                    fw.write(chunk)
+                    print('Wrote to file:', chunk.decode('utf-8', errors='ignore'))
 
             print(f"File {i} received successfully.")
             nettoyer_fichier(text_file)  # Nettoyer le fichier reçu
 
         else:
             print(f"Unknown command received: {data.decode('utf-8', errors='ignore')}")
+
+
 
     batiments1 = charger_batiments("fileProj1.json")
     batiments2 = charger_batiments("fileProj2.json")
@@ -154,6 +160,7 @@ while True:
         
         else:
             print("Unexpected response from client:", response)
+    con_liest[0].send("WIN".encode('utf8'))
         
 
 # Vous pouvez garder le socket serveur actif si nécessaire
