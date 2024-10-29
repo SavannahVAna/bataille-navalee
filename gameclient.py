@@ -33,7 +33,7 @@ def envoi():
 
 def await_response(socket : socket, id : str):
     while True:
-        server_message = socket.recv(1024).decode('utf-8', errors='ignore')  # Réception et décodage du message
+        server_message = socket.recv(32).decode('utf-8', errors='ignore')  # Réception et décodage du message
         if not server_message:
             print("Connection closed by server.")
             break
@@ -43,15 +43,21 @@ def await_response(socket : socket, id : str):
             print("It's your turn!")
             # Ici, vous pourriez ajouter la logique pour l'action à réaliser lors du tour du client
             # Exemple : envoyer un coup de jeu
-            return 0, socket
+            return 0, socket, []
             #socket.send(b'MOVE_POSITION')   Envoyer la commande pour effectuer une action (exemple)
         elif server_message.startswith("UPDATE"):
             print("Update received.")
+            json_data = socket.recv(1024).decode('utf-8')
+            coord_message = json.loads(json_data)
+            x = coord_message["coordinates"]["x"]
+            y = coord_message["coordinates"]["y"]
             # Ici, traiter les informations d’update envoyées par le serveur
             # Ex : recevoir l'état mis à jour du jeu et l’afficher
-            return 1, socket
+            return 1, socket, (x,y)
         elif server_message.startswith("KILL"):
-            return 2, socket
+            return 2, socket, []
+        elif server_message.startswith("HIT"):
+            return 3, socket, []
         else:
             print("Unknown message received:", server_message)
 

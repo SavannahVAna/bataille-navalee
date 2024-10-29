@@ -110,12 +110,47 @@ while True:
                         }
                     }
             coord_json = json.dumps(coord_message)
-            for i in range(0,3):
+            to_remove = []
+
+            for i in range(len(player_list)):
+                hit = False
                 if i != turn:
-                    message = "UPDATE"
-                    con_liest[i].send(message.encode('utf-8'))
+                    # HERE
+                    for bat in player_list[i].bateaux:
+                        for pos in bat.position:
+                            if pos == (x, y):
+                                bat.life -= 1
+                                hit = True
+                                bat.position.remove(pos)  # Enlève la position touchée
+                                break  # Sort de la boucle une fois qu'on a trouvé la position
+                        
+                        if bat.life == 0:
+                            # Si le bateau a 0 de vie, le retire de la liste
+                            player_list[i].bateaux.remove(bat)
+                            # Vérifier si le joueur a perdu tous ses bateaux
+                            if len(player_list[i].bateaux) == 0:
+                                message = "KILL"
+                                turn %= len(player_list)
+                                con_liest[i].send(message.encode('utf-8'))
+                                to_remove.append(i)  # Ajoute l'index à supprimer
+                                break  # Sort de la boucle dès qu'un bateau est détruit
+                                
+
+                    # Envoyer la mise à jour si le joueur n'est pas mort
+                    if i not in to_remove:
+                        message = "UPDATE"
+                        con_liest[i].send(message.encode('utf-8'))
+
         # Envoyer les coordonnées
-                    con_liest[i].sendall(coord_json.encode('utf-8'))
+                        con_liest[i].sendall(coord_json.encode('utf-8'))
+            if hit:
+                con_liest[turn].send("HIT".encode('utf-8'))
+
+            # Supprimer les joueurs et les connexions
+            for j in sorted(to_remove, reverse=True):  # Tri en ordre décroissant pour éviter les problèmes d'index
+                player_list.pop(j)  # Retire le joueur
+                con_liest.pop(j)  # Retire le socket correspondant
+            turn = (turn +1)%len(player_list) 
         
         else:
             print("Unexpected response from client:", response)

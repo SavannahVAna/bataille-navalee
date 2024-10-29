@@ -118,23 +118,24 @@ screen = pygame.display.set_mode((540, 270))
 clock = pygame.time.Clock()
 
 # Chargement des images
-player3 = pygame.image.load('sprites\\bateau3.png').convert_alpha()
-player2 = pygame.image.load('sprites\\bateau2.png').convert_alpha()
-player4 = pygame.image.load('sprites\\bateau4.png').convert_alpha()
-player5 = pygame.image.load('sprites\\bateau5.png').convert_alpha()
-background = pygame.image.load('sprites\\grille.bmp').convert() #TODO detect windows or mac/linux
-blue_player_image3 = pygame.image.load('sprites\\bateau3blue.png').convert_alpha()
-blue_player_image2 = pygame.image.load('sprites\\bateau2blue.png').convert_alpha()
-blue_player_image4 = pygame.image.load('sprites\\bateau4blue.png').convert_alpha()
-blue_player_image5 = pygame.image.load('sprites\\bateau5blue.png').convert_alpha()
-cross = pygame.image.load('sprites\\cross.png').convert_alpha()
-cursor = pygame.image.load('sprites\\cursor.png').convert_alpha()
-hit = pygame.image.load('sprites\\hit.png').convert_alpha()
+player3 = pygame.image.load('sprites/bateau3.png').convert_alpha()
+player2 = pygame.image.load('sprites/bateau2.png').convert_alpha()
+player4 = pygame.image.load('sprites/bateau4.png').convert_alpha()
+player5 = pygame.image.load('sprites/bateau5.png').convert_alpha()
+background = pygame.image.load('sprites/grille.bmp').convert() #TODO detect windows or mac/linux
+blue_player_image3 = pygame.image.load('sprites/bateau3blue.png').convert_alpha()
+blue_player_image2 = pygame.image.load('sprites/bateau2blue.png').convert_alpha()
+blue_player_image4 = pygame.image.load('sprites/bateau4blue.png').convert_alpha()
+blue_player_image5 = pygame.image.load('sprites/bateau5blue.png').convert_alpha()
+cross = pygame.image.load('sprites/cross.png').convert_alpha()
+cursor = pygame.image.load('sprites/cursor.png').convert_alpha()
+hit = pygame.image.load('sprites/hit.png').convert_alpha()
 
 # Dessin de l'arrière-plan
 screen.blit(background, (0, 0))
 blue_ships = []
 cross_list = []
+hit_list = []
 # Création de l'objet joueur en haut à gauche
 p = GameObject(player2, 6, -18, 2)
 tour = 0
@@ -149,6 +150,8 @@ while True:
     for blue_ship in blue_ships:
         screen.blit(blue_ship[0], blue_ship[1])
     for cross in cross_list:
+        screen.blit(cross[0], cross[1])
+    for cross in hit_list:
         screen.blit(cross[0], cross[1])
 
 
@@ -232,7 +235,7 @@ while True:
 
                 
         else :
-            a, con = gameclient.await_response(con, id) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
+            a, con, cords = gameclient.await_response(con, id) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if a ==0:
                 p = Cursor(cursor, 290, 18)
                 play = True
@@ -253,13 +256,28 @@ while True:
                         
                         elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
                             # Imprime les coordonnées sous forme de tuple
+                            cross_list.append([cross,(p.pos.x, p.pos.y)])
                             adjusted_x = (p.pos.x - 290) / 24
                             adjusted_y = (p.pos.y + 18) / 24 -1.5 # Ajuste la position y pour compenser
-                            #TODO send server
+                            
                             p =None
                             play =False
-            #elif a ==1:
+                            gameclient.play(con,(adjusted_x, adjusted_y))
+            elif a ==1:
                 #faire la focntion await response retourner un tuple de coordonées en plus
+                pixel_x = cords[0] * 24 +18
+                pixel_y = (cords[1] + 1.5) * 24 - 18
+                hit_list.append([cross,(pixel_x,pixel_y)])
+            elif a == 3:
+                e = cross_list.pop()
+                e[0] = hit
+                cross_list.append(e)
+            elif a == 2 :
+                print("you're dead")
+                pygame.quit()
+                sys.exit()
+                
+
 
                 
 
