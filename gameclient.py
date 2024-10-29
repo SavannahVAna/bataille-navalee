@@ -2,35 +2,38 @@ import socket
 import uuid
 import json
 
+def envoi_bateaux(csFT, bateaux_data):
+    """Envoie la liste des bateaux en format JSON au serveur."""
+    json_data = json.dumps(bateaux_data)
+    csFT.sendall(json_data.encode('utf-8'))
+    print("Sent ships' positions to the server.")
+
 def envoi(): 
     csFT = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     csFT.connect((socket.gethostname(), 8756))
-    client_id = str(uuid.uuid4())  # Remplacez par un identifiant dynamique si nécessaire
-    csFT.send(client_id.encode('utf-8'))
+    #client_id = str(uuid.uuid4())  # Remplacez par un identifiant dynamique si nécessaire
+    #csFT.send(client_id.encode('utf-8'))
     
     # Envoyer une commande au serveur pour indiquer qu'un fichier va être envoyé
-    csFT.send(b'SEND_FILE')  # Indiquer au serveur que l'on va envoyer un fichier
+    while True:
+        data = csFT.recv(32)
+        if data == b'SEND_FILE':
+            print("Server requested ships' positions.")
 
-    text_file = 'positions.json'
-    
-    # Lire le fichier JSON
-    with open(text_file, 'r') as fs: 
-        json_data = fs.read()  # Lire tout le contenu du fichier
-        print('Sending data:', json_data)  # Afficher le contenu JSON
+            # Chargement des bateaux depuis un fichier ou configuration
+            with open("positions.json", "r") as f:
+                bateaux_data = json.load(f)
+            
+            # Envoyer les bateaux
+            envoi_bateaux(csFT, bateaux_data)
+            message = "ENDED"
+            csFT.sendall(message.encode('utf-8'))
+            break
 
-        # Indiquer le début de l'envoi
-        csFT.send(b'SEND_FILE')  # Indiquer au serveur que l'envoi commence
 
-        # Envoyer les données JSON
-        csFT.sendall(json_data.encode('utf-8'))  # Envoyer tout le JSON encodé en UTF-8
+    return csFT
 
-        # Indiquer la fin de l'envoi
-        csFT.send(b'ENDED')  # Envoyer le signal de fin après avoir terminé d'envoyer
-        print('Sent END signal.')
-
-    return csFT, client_id
-
-def await_response(client_socket: socket.socket, id: str):
+def await_response(client_socket: socket.socket):
     while True:
         try:
             server_message = client_socket.recv(32).decode('utf-8', errors='ignore')  # Réception et décodage du message
@@ -66,6 +69,7 @@ def await_response(client_socket: socket.socket, id: str):
         except Exception as e:
             print(f"Error receiving data: {e}")
             break
+        
 def play(socket :socket, coo : tuple):
     try:
         # Envoyer le message d'identification "RESPONSE"

@@ -14,8 +14,8 @@ def dictapped(de : list):
     }
     with open('positions.json', 'w') as f:
         json.dump(bati, f, indent=4)
-    a,b = gameclient.envoi()
-    return a,b
+    a = gameclient.envoi()
+    return a
 
 class GameObject:
     def __init__(self, image, x, y, size):
@@ -130,7 +130,7 @@ blue_player_image5 = pygame.image.load('sprites/bateau5blue.png').convert_alpha(
 cross = pygame.image.load('sprites/cross.png').convert_alpha()
 cursor = pygame.image.load('sprites/cursor.png').convert_alpha()
 hit = pygame.image.load('sprites/hit.png').convert_alpha()
-
+play = False
 # Dessin de l'arrière-plan
 screen.blit(background, (0, 0))
 blue_ships = []
@@ -230,39 +230,41 @@ while True:
                     tour+=1
                     total.append(temp)
                     if tour ==5:
-                        con, id = dictapped(total)
+                        con = dictapped(total)
                         phase1 =False
 
                 
         else :
-            a, con, cords = gameclient.await_response(con, id) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
+            if not play:
+                a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if a ==0:
-                p = Cursor(cursor, 290, 18)
+                if p == None :
+                    p = Cursor(cursor, 290, 18)
                 play = True
-                while play:
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    elif event.type == pygame.KEYDOWN:
-                        # Déclenche le mouvement uniquement au moment de l'appui initial
-                        if event.key == pygame.K_UP:
-                            p.move(up=True)
-                        elif event.key == pygame.K_DOWN:
-                            p.move(down=True)
-                        elif event.key == pygame.K_LEFT:
-                            p.move(left=True)
-                        elif event.key == pygame.K_RIGHT:
-                            p.move(right=True)
+                
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    # Déclenche le mouvement uniquement au moment de l'appui initial
+                    if event.key == pygame.K_UP:
+                        p.move(up=True)
+                    elif event.key == pygame.K_DOWN:
+                        p.move(down=True)
+                    elif event.key == pygame.K_LEFT:
+                        p.move(left=True)
+                    elif event.key == pygame.K_RIGHT:
+                        p.move(right=True)
+                    
+                    elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
+                        # Imprime les coordonnées sous forme de tuple
+                        cross_list.append([cross,(p.pos.x, p.pos.y)])
+                        adjusted_x = (p.pos.x - 290) / 24
+                        adjusted_y = (p.pos.y + 18) / 24 -1.5 # Ajuste la position y pour compenser
                         
-                        elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
-                            # Imprime les coordonnées sous forme de tuple
-                            cross_list.append([cross,(p.pos.x, p.pos.y)])
-                            adjusted_x = (p.pos.x - 290) / 24
-                            adjusted_y = (p.pos.y + 18) / 24 -1.5 # Ajuste la position y pour compenser
-                            
-                            p =None
-                            play =False
-                            gameclient.play(con,(adjusted_x, adjusted_y))
+                        p =None
+                        play =False
+                        gameclient.play(con,(adjusted_x, adjusted_y))
             elif a ==1:
                 #faire la focntion await response retourner un tuple de coordonées en plus
                 pixel_x = cords[0] * 24 +18
