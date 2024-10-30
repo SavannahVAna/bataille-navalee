@@ -2,6 +2,12 @@ import pygame
 import sys
 import json
 import gameclient
+import threading
+def background_await_response(socket):
+    global response_result
+    while True:
+        response_result = gameclient.await_response(socket)
+
 def dictapped(de : list):
     bati = {
         "bateaux" :[
@@ -122,7 +128,7 @@ player3 = pygame.image.load('sprites/bateau3.png').convert_alpha()
 player2 = pygame.image.load('sprites/bateau2.png').convert_alpha()
 player4 = pygame.image.load('sprites/bateau4.png').convert_alpha()
 player5 = pygame.image.load('sprites/bateau5.png').convert_alpha()
-background = pygame.image.load('sprites/grille.bmp').convert() #TODO detect windows or mac/linux
+background = pygame.image.load('sprites/grille.bmp').convert() 
 blue_player_image3 = pygame.image.load('sprites/bateau3blue.png').convert_alpha()
 blue_player_image2 = pygame.image.load('sprites/bateau2blue.png').convert_alpha()
 blue_player_image4 = pygame.image.load('sprites/bateau4blue.png').convert_alpha()
@@ -142,6 +148,8 @@ tour = 0
 total = []
 enabled = False
 phase1 = True
+response_result = None
+
 # Boucle principale
 while True:
     screen.blit(background, (0, 0))  # Redessiner l'arrière-plan
@@ -149,10 +157,13 @@ while True:
         screen.blit(p.image, p.pos)  # Afficher le joueur
     for blue_ship in blue_ships:
         screen.blit(blue_ship[0], blue_ship[1])
-    for cross in cross_list:
-        screen.blit(cross[0], cross[1])
-    for cross in hit_list:
-        screen.blit(cross[0], cross[1])
+    for crossi in cross_list:
+        try :
+            screen.blit(crossi[0], crossi[1])
+        except Exception:
+            print(cross)
+    for crosst in hit_list:
+        screen.blit(crosst[0], crosst[1])
 
 
     for event in pygame.event.get():
@@ -232,11 +243,18 @@ while True:
                     if tour ==5:
                         con = dictapped(total)
                         phase1 =False
+                        client_thread = threading.Thread(target=background_await_response, args=(con,))
+                        client_thread.daemon = True
+                        client_thread.start()
+                        a = -1
 
                 
         else :
-            if not play:
-                a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
+            if response_result is not None:
+                a, con, cords = response_result  # Unpack de la réponse
+                response_result = None  # Reset pour la prochaine réponse
+            #if not play:
+                #a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if a ==0:
                 if p == None :
                     p = Cursor(cursor, 290, 18)
@@ -259,21 +277,27 @@ while True:
                     elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
                         # Imprime les coordonnées sous forme de tuple
                         cross_list.append([cross,(p.pos.x, p.pos.y)])
+                        print(cross_list)
                         adjusted_x = (p.pos.x - 290) / 24
                         adjusted_y = (p.pos.y + 18) / 24 -1.5 # Ajuste la position y pour compenser
                         
                         p =None
                         play =False
                         gameclient.play(con,(adjusted_x, adjusted_y))
+                        a = -1
             elif a ==1:
                 #faire la focntion await response retourner un tuple de coordonées en plus
                 pixel_x = cords[0] * 24 +18
                 pixel_y = (cords[1] + 1.5) * 24 - 18
                 hit_list.append([cross,(pixel_x,pixel_y)])
+                print("hit")
+                a = -1
             elif a == 3:
                 e = cross_list.pop()
                 e[0] = hit
                 cross_list.append(e)
+                print(cross_list)
+                a = -1
             elif a == 2 :
                 print("you're dead")
                 pygame.quit()
