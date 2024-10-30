@@ -290,13 +290,14 @@ while True:
                 pixel_x = cords[0] * 24 +18
                 pixel_y = (cords[1] + 1.5) * 24 - 18
                 hit_list.append([cross,(pixel_x,pixel_y)])
-                print("hit")
+                print("update happened")
                 a = -1
             elif a == 3:
                 e = cross_list.pop()
                 e[0] = hit
                 cross_list.append(e)
                 print(cross_list)
+                print("hit")
                 a = -1
             elif a == 2 :
                 print("you're dead")

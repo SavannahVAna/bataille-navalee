@@ -77,7 +77,7 @@ def handle_game(players):
         current_player = player_list[turn]
         current_conn = current_player[2]
         current_id = current_player[1]
-        
+        print("tpur de " + current_id)
         current_conn.send(b"YOUR_TURN")
         response = current_conn.recv(64).decode('utf-8')
         
@@ -121,6 +121,7 @@ def handle_game(players):
                 if play[1] != current_id:  # Exclure le joueur actuel
                     play[2].send(b"UPDATE")
                     play[2].sendall(coord_json.encode('utf-8'))
+                    print("update sent to " + play[1])
 
             turn = (turn+1) % len(player_list) if player_list else 0
 

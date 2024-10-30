@@ -16,6 +16,7 @@ def envoi():
     csFT = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     csFT.connect((socket.gethostname(), 8756))
     client_id = str(uuid.uuid4())  # Génère un identifiant unique pour le client
+    print(client_id)
     csFT.sendall(client_id.encode('utf-8'))
     
     while True:
