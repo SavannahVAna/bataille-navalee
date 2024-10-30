@@ -2,19 +2,22 @@ import socket
 import uuid
 import json
 
-def envoi_bateaux(csFT, bateaux_data):
-    """Envoie la liste des bateaux en format JSON au serveur."""
-    json_data = json.dumps(bateaux_data)
+def envoi_bateaux(csFT, client_id, bateaux_data):
+    """Envoie la liste des bateaux et l'UUID du client en format JSON au serveur."""
+    data = {
+        "client_id": client_id,
+        "bateaux": bateaux_data
+    }
+    json_data = json.dumps(data)
     csFT.sendall(json_data.encode('utf-8'))
     print("Sent ships' positions to the server.")
 
 def envoi(): 
     csFT = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     csFT.connect((socket.gethostname(), 8756))
-    #client_id = str(uuid.uuid4())  # Remplacez par un identifiant dynamique si nécessaire
-    #csFT.send(client_id.encode('utf-8'))
+    client_id = str(uuid.uuid4())  # Génère un identifiant unique pour le client
+    csFT.sendall(client_id.encode('utf-8'))
     
-    # Envoyer une commande au serveur pour indiquer qu'un fichier va être envoyé
     while True:
         data = csFT.recv(32)
         if data == b'SEND_FILE':
@@ -24,24 +27,22 @@ def envoi():
             with open("positions.json", "r") as f:
                 bateaux_data = json.load(f)
             
-            # Envoyer les bateaux
-            envoi_bateaux(csFT, bateaux_data)
+            # Envoyer les bateaux avec l'UUID
+            envoi_bateaux(csFT, client_id, bateaux_data)
             message = "ENDED"
             csFT.sendall(message.encode('utf-8'))
             break
 
-
-    return csFT
+    return csFT, client_id  # Retourne aussi l'UUID
 
 def await_response(client_socket: socket.socket):
     while True:
         try:
-            server_message = client_socket.recv(32).decode('utf-8', errors='ignore')  # Réception et décodage du message
+            server_message = client_socket.recv(32).decode('utf-8', errors='ignore')
             if not server_message:
                 print("Connection closed by server.")
                 break
 
-            # Vérifier si le message commence par "YOUR_TURN" ou "UPDATE"
             if server_message.startswith("YOUR_TURN"):
                 print("It's your turn!")
                 return 0, client_socket, []
@@ -70,29 +71,22 @@ def await_response(client_socket: socket.socket):
             print(f"Error receiving data: {e}")
             break
         
-def play(socket :socket, coo : tuple):
+def play(socket: socket.socket, client_id: str, coo: tuple):
     try:
-        # Envoyer le message d'identification "RESPONSE"
         message_type = "RESPONSE"
-        socket.sendall(message_type.encode('utf-8'))
-        
-        # Préparer les coordonnées en format JSON
+        socket.sendall(f"{message_type}:{client_id}".encode('utf-8'))  # Inclut l'UUID dans le message
+
         coord_message = {
+            "client_id": client_id,  # Ajoute l'UUID aux coordonnées
             "coordinates": {
                 "x": coo[0],
                 "y": coo[1]
             }
         }
-        # Convertir le dictionnaire en une chaîne JSON
         coord_json = json.dumps(coord_message)
-
-        # Envoyer les coordonnées
         socket.sendall(coord_json.encode('utf-8'))
         print("Response and coordinates sent to server.")
         
     except socket.error as e:
         print(f"An error occurred: {e}")
 
-
-
-# Exemple d'appel de la fonction

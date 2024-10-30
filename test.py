@@ -20,8 +20,8 @@ def dictapped(de : list):
     }
     with open('positions.json', 'w') as f:
         json.dump(bati, f, indent=4)
-    a = gameclient.envoi()
-    return a
+    a, id = gameclient.envoi()
+    return a, id
 
 class GameObject:
     def __init__(self, image, x, y, size):
@@ -241,7 +241,7 @@ while True:
                     tour+=1
                     total.append(temp)
                     if tour ==5:
-                        con = dictapped(total)
+                        con, ide = dictapped(total)
                         phase1 =False
                         client_thread = threading.Thread(target=background_await_response, args=(con,))
                         client_thread.daemon = True
@@ -283,7 +283,7 @@ while True:
                         
                         p =None
                         play =False
-                        gameclient.play(con,(adjusted_x, adjusted_y))
+                        gameclient.play(con,ide, (adjusted_x, adjusted_y))
                         a = -1
             elif a ==1:
                 #faire la focntion await response retourner un tuple de coordonées en plus
