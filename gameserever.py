@@ -72,7 +72,8 @@ def handle_game(players):
         batiments = charger_batiments(text_file)
         player_list.append([classes.Player(text[n], batiments), client_id, conn])  # Utilise l'UUID pour le joueur
         n += 1
-
+        for p in player_list:
+            print(p[0])
     turn = 0
     while len(player_list) > 1:
         current_player = player_list[turn]
@@ -93,6 +94,7 @@ def handle_game(players):
             x = coord_message["coordinates"]["x"]
             y = coord_message["coordinates"]["y"]
             coord_json = json.dumps({"client_id": received_id, "coordinates": {"x": x, "y": y}})
+            print("coords received " + str(x) + ":" + str(y))
             
             hit = False
             to_remove = []
@@ -116,6 +118,7 @@ def handle_game(players):
             
             # Confirme si le tir a touché ou non
             if hit:
+                print("hit")
                 current_conn.send(b"HIT")
 
             # Envoie de l'UPDATE aux autres joueurs

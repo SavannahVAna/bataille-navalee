@@ -4,6 +4,10 @@ class Batiment:
     def __init__(self, position: list[tuple[int, int]], life: int):
         self.position = position
         self.life = life
+    
+    def __str__(self):
+        return self.position + "vie : " + self.life
+
 
 class Player:
     def __init__(self, environment : str, bat : list[Batiment]=[]):
@@ -68,6 +72,12 @@ class Player:
             return True
         print(f"Echec du placement du bateau de taille {bateau.life}.")
         return False
+    
+    def __str__(self) -> str:
+        y = self.environment + " : "
+        for i in self.bateaux:
+            y += i.__str__() + "\\n"
+        return y
 
 class Game:
     def __init__(self):
