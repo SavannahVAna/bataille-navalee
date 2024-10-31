@@ -79,6 +79,7 @@ def handle_game(players):
         current_conn = current_player[2]
         current_id = current_player[1]
         print("tpur de " + current_id)
+        time.sleep(0.05)
         current_conn.send(b"YOUR_TURN")
         response = current_conn.recv(64).decode('utf-8')
         
@@ -164,5 +165,6 @@ def start_server():
 
     accept_thread = threading.Thread(target=accept_clients, args=(server_socket,))
     accept_thread.start()
+    accept_thread.join()
 
 start_server()

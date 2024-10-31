@@ -54,6 +54,7 @@ def await_response(client_socket: socket.socket):
                 coord_message = json.loads(json_data)
                 x = coord_message["coordinates"]["x"]
                 y = coord_message["coordinates"]["y"]
+                print(x,y)
                 return 1, client_socket, (x, y)
 
             elif server_message.startswith("KILL"):

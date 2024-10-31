@@ -3,11 +3,15 @@ import sys
 import json
 import gameclient
 import threading
-
+from queue import Queue
 def background_await_response(socket):
     global response_result
     while True:
         response_result = gameclient.await_response(socket)
+        
+        if response_result[0] == 1:
+            print(response_result)
+            print("update made here")
 
 def dictapped(de : list):
     bati = {
@@ -151,7 +155,7 @@ enabled = False
 phase1 = True
 response_lock = threading.Lock()
 response_result = None
-
+response_queue = Queue()
 # Boucle principale
 while True:
     screen.blit(background, (0, 0))  # Redessiner l'arrière-plan
@@ -254,20 +258,49 @@ while True:
         else :
             with response_lock:
                 if response_result is not None:
-                    a, con, cords = response_result  # Unpack de la réponse
-        
+                    b, conn, cordss = response_result  # Unpack de la réponse
+                    response_queue.put((b,conn,cordss))
                     response_result = None  # Reset pour la prochaine réponse
             #if not play:
                 #a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
-            if a ==0:
-                if p == None :
-                    p = Cursor(cursor, 290, 18)
-                play = True
-                
-                if event.type == pygame.QUIT:
+            if not response_queue.empty():
+                a, con, cords = response_queue.get()
+                print(a)
+                print(cords)
+                if a ==0:
+                    if p == None :
+                        p = Cursor(cursor, 290, 18)
+                    play = True
+                    
+                    
+                            
+                if a ==1:
+                    #faire la focntion await response retourner un tuple de coordonées en plus
+                    pixel_x = cords[0] * 24 +18
+                    pixel_y = (cords[1] + 1.5) * 24 - 18
+                    hit_list.append([cross,(pixel_x,pixel_y)])
+                    print("update happened")
+                    
+                if a == 3:
+                    e = cross_list.pop()
+                    e[0] = hit
+                    cross_list.append(e)
+                    print(cross_list)
+                    print("hit")
+                    
+                if a == 2 :
+                    print("you're dead")
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
+                if a == 4 :
+                    print("you won")
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+            if play:
+                if event.type == pygame.KEYDOWN:
                     # Déclenche le mouvement uniquement au moment de l'appui initial
                     if event.key == pygame.K_UP:
                         p.move(up=True)
@@ -288,29 +321,6 @@ while True:
                         p =None
                         play =False
                         gameclient.play(con,ide, (adjusted_x, adjusted_y))
-                        a = -1
-            elif a ==1:
-                #faire la focntion await response retourner un tuple de coordonées en plus
-                pixel_x = cords[0] * 24 +18
-                pixel_y = (cords[1] + 1.5) * 24 - 18
-                hit_list.append([cross,(pixel_x,pixel_y)])
-                print("update happened")
-                a = -1
-            if a == 3:
-                e = cross_list.pop()
-                e[0] = hit
-                cross_list.append(e)
-                print(cross_list)
-                print("hit")
-                a = -1
-            elif a == 2 :
-                print("you're dead")
-                pygame.quit()
-                sys.exit()
-            elif a == 4 :
-                print("you won")
-                pygame.quit()
-                sys.exit()
                 
 
 
