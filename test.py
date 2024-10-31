@@ -3,6 +3,7 @@ import sys
 import json
 import gameclient
 import threading
+
 def background_await_response(socket):
     global response_result
     while True:
@@ -148,6 +149,7 @@ tour = 0
 total = []
 enabled = False
 phase1 = True
+response_lock = threading.Lock()
 response_result = None
 
 # Boucle principale
@@ -250,9 +252,11 @@ while True:
 
                 
         else :
-            if response_result is not None:
-                a, con, cords = response_result  # Unpack de la réponse
-                response_result = None  # Reset pour la prochaine réponse
+            with response_lock:
+                if response_result is not None:
+                    a, con, cords = response_result  # Unpack de la réponse
+        
+                    response_result = None  # Reset pour la prochaine réponse
             #if not play:
                 #a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if a ==0:
@@ -292,7 +296,7 @@ while True:
                 hit_list.append([cross,(pixel_x,pixel_y)])
                 print("update happened")
                 a = -1
-            elif a == 3:
+            if a == 3:
                 e = cross_list.pop()
                 e[0] = hit
                 cross_list.append(e)

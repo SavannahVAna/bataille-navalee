@@ -4,6 +4,7 @@ import json
 import uuid
 import classes
 from queue import Queue
+import time
 
 def nettoyer_fichier(nom_fichier):
     with open(nom_fichier, 'r+') as fw:
@@ -120,6 +121,7 @@ def handle_game(players):
             for play in player_list:
                 if play[1] != current_id:  # Exclure le joueur actuel
                     play[2].send(b"UPDATE")
+                    time.sleep(0.05)
                     play[2].sendall(coord_json.encode('utf-8'))
                     print("update sent to " + play[1])
 
