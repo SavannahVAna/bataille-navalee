@@ -4,11 +4,11 @@ import json
 import gameclient
 import threading
 from queue import Queue
-def background_await_response(socket):
+def background_await_response(socket, response_q):
     global response_result
     while True:
         response_result = gameclient.await_response(socket)
-        
+        response_q.put(response_result)
         if response_result[0] == 1:
             print(response_result)
             print("update made here")
@@ -249,18 +249,18 @@ while True:
                     if tour ==5:
                         con, ide = dictapped(total)
                         phase1 =False
-                        client_thread = threading.Thread(target=background_await_response, args=(con,))
+                        client_thread = threading.Thread(target=background_await_response, args=(con,response_queue,))
                         client_thread.daemon = True
                         client_thread.start()
                         a = -1
 
                 
         else :
-            with response_lock:
+            """with response_lock:
                 if response_result is not None:
                     b, conn, cordss = response_result  # Unpack de la réponse
                     response_queue.put((b,conn,cordss))
-                    response_result = None  # Reset pour la prochaine réponse
+                    response_result = None  # Reset pour la prochaine réponse"""
             #if not play:
                 #a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if not response_queue.empty():
