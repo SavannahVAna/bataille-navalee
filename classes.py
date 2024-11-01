@@ -6,14 +6,14 @@ class Batiment:
         self.life = life
     
     def __str__(self):
-        return self.position + "vie : " + self.life
+        return f"Position: {self.position}, Vie: {self.life}"
 
 
 class Player:
     def __init__(self, environment : str, bat : list[Batiment]=[]):
         print("Initialisation du joueur...")
         self.grille = [[0 for _ in range(10)] for _ in range(10)]
-        self.bateaux: list[Batiment] = []  # Liste pour stocker jusqu'à 5 bateaux
+        self.bateaux = bat  # Liste pour stocker jusqu'à 5 bateaux
         self.taille_bateaux = [2, 3, 3, 4, 5]  # Tailles des bateaux
         if len(bat) ==0:
             self.placer_bateaux_aleatoires()
@@ -74,9 +74,9 @@ class Player:
         return False
     
     def __str__(self) -> str:
-        y = self.environment + " : "
+        y = self.environment + " :\n"
         for i in self.bateaux:
-            y += i.__str__() + "\\n"
+            y += str(i) + "\n"
         return y
 
 class Game:

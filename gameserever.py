@@ -23,9 +23,9 @@ def charger_batiments(nom_fichier):
     with open(nom_fichier, "r") as f:
         data = json.load(f)
 
-        # Boucle sur chaque bateau dans la liste des bateaux du fichier JSON
-        for bateau in data["bateaux"]:
-            # Accès direct aux valeurs, avec des valeurs par défaut en cas d'absence
+        # Accès à la liste des bateaux dans la bonne structure
+        for bateau in data["bateaux"]["bateaux"]:
+            # Accès direct aux valeurs
             position = bateau["position"] if "position" in bateau else (0, 0)
             taille = bateau["taille"] if "taille" in bateau else 0
             h = bateau["horizontal"] if "horizontal" in bateau else True
@@ -40,6 +40,8 @@ def charger_batiments(nom_fichier):
             
             # Création de l'instance Batiment avec la position calculée et la vie
             batiment = classes.Batiment(position=pos, life=taille)
+            print("fonction charger batiment")
+            print(batiment)
             batiments.append(batiment)
 
     return batiments
