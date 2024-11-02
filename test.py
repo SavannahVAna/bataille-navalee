@@ -4,14 +4,16 @@ import json
 import gameclient
 import threading
 from queue import Queue
+import os
+
 def background_await_response(socket, response_q):
     global response_result
     while True:
         response_result = gameclient.await_response(socket)
         response_q.put(response_result)
-        if response_result[0] == 1:
-            print(response_result)
-            print("update made here")
+        #if response_result[0] == 1:
+            #print(response_result)
+            #print("update made here")
 
 def dictapped(de : list):
     bati = {
@@ -285,17 +287,25 @@ while True:
                     e = cross_list.pop()
                     e[0] = hit
                     cross_list.append(e)
-                    print(cross_list)
+                    #print(cross_list)
                     print("hit")
                     
                 if a == 2 :
                     print("you're dead")
+                    os.remove("positions.json")
                     pygame.quit()
                     sys.exit()
                 if a == 4 :
                     print("you won")
+                    os.remove("positions.json")
                     pygame.quit()
                     sys.exit()
+                if a ==5:
+                    print("vous avez coulé un bateau!")
+                    e = cross_list.pop()
+                    e[0] = hit
+                    cross_list.append(e)
+                    #print(cross_list)
             if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()

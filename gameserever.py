@@ -5,6 +5,18 @@ import uuid
 import classes
 from queue import Queue
 import time
+import os
+import glob
+import sys
+
+def supprimer_fichiers():
+    # Trouver tous les fichiers qui commencent par "fileProj_"
+    for file_name in glob.glob("fileProj_*.json"):
+        try:
+            os.remove(file_name)
+            print(f"Fichier {file_name} supprimé.")
+        except Exception as e:
+            print(f"Erreur lors de la suppression de {file_name}: {e}")
 
 def nettoyer_fichier(nom_fichier):
     with open(nom_fichier, 'r+') as fw:
@@ -99,6 +111,7 @@ def handle_game(players):
             print("coords received " + str(x) + ":" + str(y))
             
             hit = False
+            coulé = False
             to_remove = []
             
             # Vérifie si un bateau est touché
@@ -111,6 +124,7 @@ def handle_game(players):
                             hit = True
                             if bat.life == 0:
                                 player[0].bateaux.remove(bat)
+                                coulé = True
                                 if not player[0].bateaux:
                                     player[2].send(b"KILL")
                                     to_remove.append(player[1])
@@ -119,7 +133,10 @@ def handle_game(players):
             player_list = [player for player in player_list if player[1] not in to_remove]
             
             # Confirme si le tir a touché ou non
-            if hit:
+            if coulé:
+                current_conn.send(b"COULE")
+
+            elif hit:
                 print("hit")
                 current_conn.send(b"HIT")
 
@@ -136,8 +153,10 @@ def handle_game(players):
     # Envoi de la victoire au dernier joueur restant
     if player_list:
         player_list[0][2].send(b"WIN")
-    for player in player_list:
-        player[2].close()
+    supprimer_fichiers()
+    time.sleep(5)
+    sys.exit()
+    
 
 def accept_clients(server_socket):
     queue = Queue()

@@ -65,6 +65,9 @@ def await_response(client_socket: socket.socket):
 
             elif server_message.startswith("WIN"):
                 return 4, client_socket, []
+            
+            elif server_message.startswith("COULE"):
+                return 5, client_socket, []
 
             else:
                 print("Unknown message received:", server_message)
