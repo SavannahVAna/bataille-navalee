@@ -34,12 +34,12 @@ class GameObject:
     def __init__(self, image, x, y, size):
         self.image = image
         self.pos = pygame.Vector2(x, y)
-        self.target_pos = pygame.Vector2(x, y)  # Position cible pour le mouvement
+        self.target_pos = pygame.Vector2(x, y)  
         self.horizontal = True  # Orientation du bateau : horizontal = True, vertical = False
         self.size = size
 
     def move(self, up=False, down=False, left=False, right=False):
-        # Crée une copie de la position cible pour simuler le déplacement
+        
         new_target_pos = self.target_pos.copy()
 
         if up:
@@ -53,21 +53,21 @@ class GameObject:
 
         # Limites pour empêcher l'objet de sortir de la grille en fonction de son orientation
         if self.horizontal:
-            # Limites pour un objet horizontal (largeur 3 cases)
+            # Limites pour un objet horizontal
             if new_target_pos.x < 6 or new_target_pos.x > 6 + (9 * 24 - (self.size - 1) * 24):  # S'assure qu'il ne sort pas à gauche ou à droite
                 return
             if new_target_pos.y < -18 or new_target_pos.y > -18 + (9 * 24):  # S'assure qu'il ne sort pas en haut ou en bas
                 return
         else:
-            # Limites pour un objet vertical (hauteur 3 cases)
+            # Limites pour un objet vertical
             if new_target_pos.x < -18 or new_target_pos.x > -18 + (9 * 24):  # S'assure qu'il ne sort pas à gauche ou à droite
                 return
             if new_target_pos.y < 6 or new_target_pos.y > 6 + (9 * 24 - (self.size - 1) * 24):  # S'assure qu'il ne sort pas en haut ou en bas
                 return
 
         # Applique le mouvement seulement si le nouvel emplacement est dans les limites
-        self.target_pos = new_target_pos  # Met à jour la position cible
-        self.pos = self.target_pos  # Déplace directement vers la cible
+        self.target_pos = new_target_pos  
+        self.pos = self.target_pos  
 
     def rotate(self):
     # Vérifie que la rotation reste dans les limites
@@ -76,29 +76,29 @@ class GameObject:
             if (self.pos.x < 6 or 
                 self.pos.x > 6 + (9 * 24 - (self.size - 1) * 24) or
                 self.pos.y < 6 or 
-                self.pos.y > 6 + (7 * 24 - (self.size - 1) * 24)):  # Ajustez la limite supérieure
+                self.pos.y > 6 + (7 * 24 - (self.size - 1) * 24)):  
                 return
         else:  # Si l’objet passe de vertical à horizontal
             # Limites pour un objet horizontal
             if (self.pos.x < 6 or 
-                self.pos.x > 6 + (7 * 24 - (self.size - 1) * 24) or  # Ajustez la limite supérieure
+                self.pos.x > 6 + (7 * 24 - (self.size - 1) * 24) or 
                 self.pos.y < -18 or 
                 self.pos.y > -18 + (9 * 24)):
                 return
 
 
-        self.horizontal = not self.horizontal  # Change l'orientation
+        self.horizontal = not self.horizontal  
         self.image = pygame.transform.rotate(self.image, 90)  # Pivote l'image de 90 degrés
     
 class Cursor:
     def __init__(self, image, x, y):
         self.image = image
         self.pos = pygame.Vector2(x, y)
-        self.target_pos = pygame.Vector2(x, y)  # Position cible pour le mouvement
+        self.target_pos = pygame.Vector2(x, y) 
         
 
     def move(self, up=False, down=False, left=False, right=False):
-        # Crée une copie de la position cible pour simuler le déplacement
+       
         new_target_pos = self.target_pos.copy()
 
         if up:
@@ -112,7 +112,7 @@ class Cursor:
 
         # Limites pour empêcher l'objet de sortir de la grille en fonction de son orientation
         
-            # Limites pour un objet horizontal (largeur 3 cases)
+            # Limites pour un objet horizontal 
         if new_target_pos.x < 276 or new_target_pos.x > 276 + (10 * 24 ):  # S'assure qu'il ne sort pas à gauche ou à droite
             return
         if new_target_pos.y < 0 or new_target_pos.y > -18 + (11 * 24):  # S'assure qu'il ne sort pas en haut ou en bas
@@ -180,7 +180,7 @@ while True:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                # Déclenche le mouvement uniquement au moment de l'appui initial
+               
                 if event.key == pygame.K_UP:
                     p.move(up=True)
                 elif event.key == pygame.K_DOWN:
@@ -191,11 +191,11 @@ while True:
                     p.move(right=True)
                 elif event.key == pygame.K_t:  # Rotation sur appui de 't'
                     p.rotate()
-                elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
+                elif event.key == pygame.K_RETURN:  # Touche Entrée pour valider
                     temp =[]
-                    # Imprime les coordonnées sous forme de tuple
+                    
                     adjusted_x = (p.pos.x - 6) / 24
-                    adjusted_y = (p.pos.y + 18) / 24  # Ajuste la position y pour compenser
+                    adjusted_y = (p.pos.y + 18) / 24  #
                     if(p.horizontal):
                         coords = (adjusted_x, adjusted_y)
                         horizon = True
@@ -267,8 +267,8 @@ while True:
                 #a, con, cords = gameclient.await_response(con) # mettre ça juste dans le else et apre changer une autre valeur su c'est phase tour ou phase update
             if not response_queue.empty():
                 a, con, cords = response_queue.get()
-                print(a)
-                print(cords)
+                #print(a)
+                #print(cords)
                 if a ==0:
                     if p == None :
                         p = Cursor(cursor, 290, 18)
@@ -311,7 +311,7 @@ while True:
                         sys.exit()
             if play:
                 if event.type == pygame.KEYDOWN:
-                    # Déclenche le mouvement uniquement au moment de l'appui initial
+                    
                     if event.key == pygame.K_UP:
                         p.move(up=True)
                     elif event.key == pygame.K_DOWN:
@@ -321,12 +321,12 @@ while True:
                     elif event.key == pygame.K_RIGHT:
                         p.move(right=True)
                     
-                    elif event.key == pygame.K_RETURN:  # Touche Entrée pour imprimer les coordonnées
-                        # Imprime les coordonnées sous forme de tuple
+                    elif event.key == pygame.K_RETURN:  
+                        
                         cross_list.append([cross,(p.pos.x, p.pos.y)])
                         print(cross_list)
                         adjusted_x = (p.pos.x - 290) / 24
-                        adjusted_y = (p.pos.y + 18) / 24 -1.5 # Ajuste la position y pour compenser
+                        adjusted_y = (p.pos.y + 18) / 24 -1.5 
                         
                         p =None
                         play =False

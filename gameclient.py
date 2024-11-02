@@ -34,7 +34,7 @@ def envoi():
             csFT.sendall(message.encode('utf-8'))
             break
 
-    return csFT, client_id  # Retourne aussi l'UUID
+    return csFT, client_id 
 
 def await_response(client_socket: socket.socket):
     while True:
@@ -79,10 +79,10 @@ def await_response(client_socket: socket.socket):
 def play(socket: socket.socket, client_id: str, coo: tuple):
     try:
         message_type = "RESPONSE"
-        socket.sendall(f"{message_type}:{client_id}".encode('utf-8'))  # Inclut l'UUID dans le message
+        socket.sendall(f"{message_type}:{client_id}".encode('utf-8')) 
 
         coord_message = {
-            "client_id": client_id,  # Ajoute l'UUID aux coordonnées
+            "client_id": client_id,  
             "coordinates": {
                 "x": coo[0],
                 "y": coo[1]

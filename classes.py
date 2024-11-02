@@ -79,10 +79,10 @@ class Player:
             y += str(i) + "\n"
         return y
 
-class Game:
+"""class Game:
     def __init__(self):
         self.joueur_air = Player("air",True)
         self.joueur_mer = Player("mer", True)
-        self.joueur_sous_marin = Player("sous-marin", True)
+        self.joueur_sous_marin = Player("sous-marin", True)"""
 
 

@@ -10,7 +10,7 @@ import glob
 import sys
 
 def supprimer_fichiers():
-    # Trouver tous les fichiers qui commencent par "fileProj_"
+    # Trouver tous les fichiers qui commencent par fileProj_ pour les dalete
     for file_name in glob.glob("fileProj_*.json"):
         try:
             os.remove(file_name)
@@ -18,7 +18,7 @@ def supprimer_fichiers():
         except Exception as e:
             print(f"Erreur lors de la suppression de {file_name}: {e}")
 
-def nettoyer_fichier(nom_fichier):
+def nettoyer_fichier(nom_fichier): #sert a enlver les messages qui se rajoutent aux json envoyé
     with open(nom_fichier, 'r+') as fw:
         lignes = fw.readlines()
         if lignes and lignes[0].strip() == 'SEND_FILE{':
@@ -35,7 +35,7 @@ def charger_batiments(nom_fichier):
     with open(nom_fichier, "r") as f:
         data = json.load(f)
 
-        # Accès à la liste des bateaux dans la bonne structure
+        # Accès à la liste des bateaux 
         for bateau in data["bateaux"]["bateaux"]:
             # Accès direct aux valeurs
             position = bateau["position"] if "position" in bateau else (0, 0)
@@ -101,7 +101,7 @@ def handle_game(players):
         if response.startswith("RESPONSE"):
             _, received_id = response.split(":")
             if received_id != current_id:
-                continue  # Ignorer si le mauvais ID a été reçu
+                continue  
             
             json_data = current_conn.recv(1024).decode('utf-8')
             coord_message = json.loads(json_data)
@@ -132,7 +132,7 @@ def handle_game(players):
             # Suppression des joueurs sans bateaux
             player_list = [player for player in player_list if player[1] not in to_remove]
             
-            # Confirme si le tir a touché ou non
+            #gestion de la réponse pour savoir si on a touché ou ps
             if coulé:
                 current_conn.send(b"COULE")
 
@@ -142,7 +142,7 @@ def handle_game(players):
 
             # Envoie de l'UPDATE aux autres joueurs
             for play in player_list:
-                if play[1] != current_id:  # Exclure le joueur actuel
+                if play[1] != current_id:  
                     play[2].send(b"UPDATE")
                     time.sleep(0.05)
                     play[2].sendall(coord_json.encode('utf-8'))
@@ -156,6 +156,7 @@ def handle_game(players):
     supprimer_fichiers()
     time.sleep(5)
     sys.exit()
+    #arretr le server
     
 
 def accept_clients(server_socket):
@@ -166,10 +167,10 @@ def accept_clients(server_socket):
         print("New client connected.")
         
         # Recevoir l'user ID du client
-        user_id = conn.recv(36).decode('utf-8')  # UUID devrait tenir dans 36 caractères
+        user_id = conn.recv(36).decode('utf-8') 
         print(f"User ID {user_id} received from client.")
         
-        # Stocker la connexion et l'user ID
+        
         player_ids[user_id] = conn
         queue.put((conn, user_id))
         
@@ -177,7 +178,7 @@ def accept_clients(server_socket):
         if queue.qsize() >= 3:
             players = {queue.get() for _ in range(3)}
     
-    # Démarrer une partie en passant directement le dictionnaire des joueurs
+    # Démarrer une partie
             threading.Thread(target=handle_game, args=(players,)).start()
 
 
