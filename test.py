@@ -283,24 +283,17 @@ while True:
                             bl = pygame.transform.rotate(bl, 90)
                         blue_ships.append([bl, (p.pos.x, p.pos.y)])
 
-                    # Vérifier que `temp` est bien formé
-                    if len(temp) == 3:
-                        total.append(temp)
-                        tour += 1
-                    else:
-                        print("Erreur: `temp` n'est pas correctement formé:", temp)
-
-                    
-
-                    # Vérifier la fin du jeu
-                    if tour == 5:
+                    # Vérifier la fin de la phase 1
+                    elif tour == 5:
                         con, ide = dictapped(total)
                         phase1 = False
                         client_thread = threading.Thread(target=background_await_response, args=(con, response_queue,))
                         client_thread.daemon = True
                         client_thread.start()
                         a = -1
-
+                    if len(temp) == 3:
+                        total.append(temp)
+                        tour += 1
 
                 
         else :
