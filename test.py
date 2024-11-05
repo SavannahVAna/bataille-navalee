@@ -6,6 +6,40 @@ import threading
 from queue import Queue
 import os
 
+def checkpos(liste, el):
+    tmp = []
+    tmp2 = []
+    
+    # Vérifier chaque élément de la liste principale
+    if liste:
+        for element in liste:
+            if len(element) < 3:
+                print(f"Erreur : Element incorrect dans liste : {element}")
+                continue
+            for i in range(element[2]):
+                if element[1]:  # Si horizontal
+                    tmp.append((element[0][0] + i, element[0][1]))
+                else:
+                    tmp.append((element[0][0], element[0][1] + i))
+    
+    # Vérifier `el` comme élément unique, au lieu d'itérer
+    if len(el) >= 3:
+        for i in range(el[2]):
+            if el[1]:  # Si horizontal
+                tmp2.append((el[0][0] + i, el[0][1]))
+            else:
+                tmp2.append((el[0][0], el[0][1] + i))
+    
+    # Vérifier s'il y a des conflits dans les coordonnées
+    for item in tmp2:
+        if item in tmp:
+            print("invalid coordinates")
+            return False
+    
+    return True
+
+        
+
 def background_await_response(socket, response_q):
     global response_result
     while True:
@@ -192,69 +226,81 @@ while True:
                 elif event.key == pygame.K_t:  # Rotation sur appui de 't'
                     p.rotate()
                 elif event.key == pygame.K_RETURN:  # Touche Entrée pour valider
-                    temp =[]
-                    
+                    temp = []
                     adjusted_x = (p.pos.x - 6) / 24
-                    adjusted_y = (p.pos.y + 18) / 24  #
-                    if(p.horizontal):
+                    adjusted_y = (p.pos.y + 18) / 24
+
+                    if p.horizontal:
                         coords = (adjusted_x, adjusted_y)
                         horizon = True
                     else:
-                        coords = (adjusted_x +1, adjusted_y -1)
+                        coords = (adjusted_x + 1, adjusted_y - 1)
                         horizon = False
-                    print("Coordonnées du bateau:", coords)
-                    temp.append(coords)
 
+                    print("Coordonnées du bateau:", coords)
+
+                    # Ajout de `coords` et `horizon` à `temp`
+                    temp.append(coords)
                     temp.append(horizon)
-                    #temp format [(x,y),horizontalité, taille]
-                    if tour == 0:
+
+                    # Conditions pour chaque tour
+                    if tour == 0 and checkpos(total, [coords, horizon, 2]):
                         temp.append(2)
                         bl = blue_player_image2
-                        if(not p.horizontal):     
+                        if not p.horizontal:
                             bl = pygame.transform.rotate(bl, 90)
-                        blue_ships.append([bl, (p.pos.x, p.pos.y)]) 
-                        p = None
+                        blue_ships.append([bl, (p.pos.x, p.pos.y)])
                         p = GameObject(player2, 6, -18, size=2)
-                    if tour == 1:
+
+                    elif tour == 1 and checkpos(total, [coords, horizon, 2]):
                         temp.append(2)
                         bl = blue_player_image2
-                        if(not p.horizontal):     
+                        if not p.horizontal:
                             bl = pygame.transform.rotate(bl, 90)
-                        blue_ships.append([bl, (p.pos.x, p.pos.y)]) 
-                        p = None
+                        blue_ships.append([bl, (p.pos.x, p.pos.y)])
                         p = GameObject(player3, 6, -18, size=3)
-                    if tour == 2:
+
+                    elif tour == 2 and checkpos(total, [coords, horizon, 3]):
                         temp.append(3)
                         bl = blue_player_image3
-                        if(not p.horizontal):     
+                        if not p.horizontal:
                             bl = pygame.transform.rotate(bl, 90)
-                        blue_ships.append([bl, (p.pos.x, p.pos.y)])  
-                        p = None
-                        p = GameObject(player4, 6, -18, 4)
-                    if tour == 3:
+                        blue_ships.append([bl, (p.pos.x, p.pos.y)])
+                        p = GameObject(player4, 6, -18, size=4)
+
+                    elif tour == 3 and checkpos(total, [coords, horizon, 4]):
                         temp.append(4)
                         bl = blue_player_image4
-                        if(not p.horizontal):     
+                        if not p.horizontal:
                             bl = pygame.transform.rotate(bl, 90)
-                        blue_ships.append([bl, (p.pos.x, p.pos.y)]) 
-                        p = None
-                        p = GameObject(player5, 6, -18, 5)
-                    if tour == 4:
+                        blue_ships.append([bl, (p.pos.x, p.pos.y)])
+                        p = GameObject(player5, 6, -18, size=5)
+
+                    elif tour == 4 and checkpos(total, [coords, horizon, 5]):
                         temp.append(5)
                         bl = blue_player_image5
-                        if(not p.horizontal):     
+                        if not p.horizontal:
                             bl = pygame.transform.rotate(bl, 90)
-                        blue_ships.append([bl, (p.pos.x, p.pos.y)]) 
-                        p = None
-                    tour+=1
-                    total.append(temp)
-                    if tour ==5:
+                        blue_ships.append([bl, (p.pos.x, p.pos.y)])
+
+                    # Vérifier que `temp` est bien formé
+                    if len(temp) == 3:
+                        total.append(temp)
+                        tour += 1
+                    else:
+                        print("Erreur: `temp` n'est pas correctement formé:", temp)
+
+                    
+
+                    # Vérifier la fin du jeu
+                    if tour == 5:
                         con, ide = dictapped(total)
-                        phase1 =False
-                        client_thread = threading.Thread(target=background_await_response, args=(con,response_queue,))
+                        phase1 = False
+                        client_thread = threading.Thread(target=background_await_response, args=(con, response_queue,))
                         client_thread.daemon = True
                         client_thread.start()
                         a = -1
+
 
                 
         else :
